@@ -251,7 +251,7 @@ npm run dev
 
 **Naveen Bathini**
 AI + Graph Intelligence Developer
-GitHub: [https://github.com/mightynawiin](https://github.com/mightynawiin)
+GitHub: [https://github.com/mightynawiin](https://github.com/mightynawiin)<br>
 WORKING PROTOTYPE: [https://finance-mule-detection.vercel.app/](https://finance-mule-detection.vercel.app/)
 
 ---
@@ -261,3 +261,4 @@ WORKING PROTOTYPE: [https://finance-mule-detection.vercel.app/](https://finance-
 FinTrace AI demonstrates advanced graph-based fraud detection intelligence combining network science, anomaly detection, and risk calibration in a production-ready architecture.
 
 If you find this project valuable, consider ⭐ starring the repository.
+
