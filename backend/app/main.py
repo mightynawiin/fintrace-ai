@@ -134,6 +134,14 @@ class SummarizeRequest(BaseModel):
     top_flagged_reasons: str = ""
     graph_hubs: str = ""
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage]
+    context: dict
+
 @app.post("/summarize")
 async def summarize(req: SummarizeRequest):
     prompt = f"""
@@ -167,5 +175,48 @@ Provide a high-level expert summary of this study. Focus on the structural integ
         if response.status_code != 200:
             raise HTTPException(status_code=502, detail=f"Groq API error: {response.text}")
         return {"summary": response.json()["choices"][0]["message"]["content"]}
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Could not reach Groq: {str(e)}")
+
+
+@app.post("/chat")
+async def chat(req: ChatRequest):
+    # Construct a system message that includes the analysis context
+    context_str = f"""
+    You are an expert AML Compliance Assistant. You are analyzing a specific transaction study.
+    Study Context:
+    - Accounts: {req.context.get('total_accounts', 'Unknown')}
+    - Fraud Rings: {req.context.get('fraud_rings', 'Unknown')}
+    - Avg Risk Score: {req.context.get('avg_risk_score', 'Unknown')}
+    - Top Flagged: {req.context.get('top_flagged_reasons', 'None')}
+    - Key Hubs: {req.context.get('graph_hubs', 'None')}
+    
+    Answer the user's questions strictly based on this context and AML best practices. 
+    Be professional, concise, and helpful.
+    """
+
+    messages = [{"role": "system", "content": context_str.strip()}]
+    for msg in req.messages:
+        messages.append({"role": msg.role, "content": msg.content})
+
+    payload = {
+        "model": GROQ_MODEL,
+        "messages": messages,
+        "temperature": 0.5,
+        "max_tokens": 600
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                GROQ_API_URL,
+                json=payload,
+                headers={"Authorization": f"Bearer {GROQ_API_KEY}"}
+            )
+        if response.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"Groq Chat API error: {response.text}")
+        
+        result = response.json()
+        return {"content": result["choices"][0]["message"]["content"]}
     except httpx.RequestError as e:
         raise HTTPException(status_code=503, detail=f"Could not reach Groq: {str(e)}")
