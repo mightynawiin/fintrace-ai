@@ -1,11 +1,13 @@
 import axios from "axios";
 
+const BACKEND_URL = "https://fintrace-ai.onrender.com";
+
 export async function analyzeCSV(file) {
   const formData = new FormData();
   formData.append("file", file);
 
   const response = await axios.post(
-    "http://127.0.0.1:8000/analyze",
+    `${BACKEND_URL}/analyze`,
     formData,
     {
       headers: {

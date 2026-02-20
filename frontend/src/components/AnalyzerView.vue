@@ -316,7 +316,7 @@ import { Bar, Doughnut } from 'vue-chartjs';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = "https://fintrace-ai.onrender.com";
 
 async function callBackendSummarize(payload) {
   const res = await fetch(`${BACKEND_URL}/summarize`, {
