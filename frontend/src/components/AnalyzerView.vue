@@ -79,7 +79,24 @@
           </div>
         </div>
 
-        <!-- Intelligence Dashboard -->
+        <!-- 1. Network Visualization -->
+        <div class="panel main-graph-panel">
+          <div class="panel-header">
+            <span class="panel-icon">🕸️</span>
+            <h3>Network Visualization</h3>
+            <div class="legend">
+              <span class="leg-item"><span class="leg-dot red"></span> Suspicious</span>
+              <span class="leg-item"><span class="leg-dot blue"></span> Clean</span>
+            </div>
+          </div>
+          <GraphView 
+            :graphData="data.graph" 
+            :suspiciousAccounts="data.suspicious_accounts" 
+            :focusedNodes="focusedNodes"
+          />
+        </div>
+
+        <!-- 2. Intelligence Dashboard (Charts) -->
         <div class="intel-dashboard">
           <div class="panel chart-panel">
             <div class="panel-header">
@@ -101,7 +118,7 @@
           </div>
         </div>
 
-          <!-- Ring Series (The "series" the user requested) -->
+        <!-- 3. Fraud Ring Series (Quick Focus) -->
         <div class="series-section" v-if="data.fraud_rings && data.fraud_rings.length">
           <div class="panel-header">
             <span class="panel-icon">📉</span>
@@ -132,28 +149,40 @@
           </div>
         </div>
 
-        <!-- Graph -->
-        <div class="panel main-graph-panel">
+        <!-- 4. Flagged Accounts Intelligence (AI Explanations) -->
+        <div class="panel" v-if="data.suspicious_accounts && data.suspicious_accounts.length">
           <div class="panel-header">
-            <span class="panel-icon">🕸️</span>
-            <h3>Network Visualization</h3>
-            <div class="legend">
-              <span class="leg-item"><span class="leg-dot red"></span> Suspicious</span>
-              <span class="leg-item"><span class="leg-dot blue"></span> Clean</span>
+            <span class="panel-icon">🚨</span>
+            <h3>Flagged Accounts Intelligence</h3>
+            <span class="count-badge red">{{ data.suspicious_accounts.length }} flagged</span>
+          </div>
+          <div class="flagged-list">
+            <div class="flagged-row" v-for="acc in data.suspicious_accounts" :key="acc.account_id">
+              <div class="fr-main">
+                <div class="fr-account">
+                  <span class="mule-icon">👤</span>
+                  <span class="mule-id">{{ acc.account_id }}</span>
+                </div>
+                <div class="fr-explanation">
+                  {{ getAccountExplanation(acc.account_id) }}
+                </div>
+                <div class="fr-patterns">
+                  <span v-for="p in acc.detected_patterns" :key="p" class="pattern-tag">{{ p }}</span>
+                </div>
+              </div>
+              <div class="fr-score-box" :class="riskLevel(acc.suspicion_score / 100)">
+                <div class="fr-score-val">{{ acc.suspicion_score.toFixed(0) }}</div>
+                <div class="fr-score-label">Risk Score</div>
+              </div>
             </div>
           </div>
-          <GraphView 
-            :graphData="data.graph" 
-            :suspiciousAccounts="data.suspicious_accounts" 
-            :focusedNodes="focusedNodes"
-          />
         </div>
 
-        <!-- Fraud Rings Table -->
+        <!-- 5. Detected Fraud Rings Table -->
         <div class="panel" v-if="data.fraud_rings && data.fraud_rings.length">
           <div class="panel-header">
             <span class="panel-icon">🔴</span>
-            <h3>Detected Fraud Rings</h3>
+            <h3>Detailed Fraud Rings</h3>
             <span class="count-badge">{{ data.fraud_rings.length }} rings</span>
           </div>
           <div class="table-wrap">
@@ -189,35 +218,6 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- Flagged Accounts -->
-        <div class="panel" v-if="data.suspicious_accounts && data.suspicious_accounts.length">
-          <div class="panel-header">
-            <span class="panel-icon">🚨</span>
-            <h3>Flagged Accounts Intelligence</h3>
-            <span class="count-badge red">{{ data.suspicious_accounts.length }} flagged</span>
-          </div>
-          <div class="flagged-list">
-            <div class="flagged-row" v-for="acc in data.suspicious_accounts" :key="acc.account_id">
-              <div class="fr-main">
-                <div class="fr-account">
-                  <span class="mule-icon">👤</span>
-                  <span class="mule-id">{{ acc.account_id }}</span>
-                </div>
-                <div class="fr-explanation">
-                  {{ getAccountExplanation(acc.account_id) }}
-                </div>
-                <div class="fr-patterns">
-                  <span v-for="p in acc.detected_patterns" :key="p" class="pattern-tag">{{ p }}</span>
-                </div>
-              </div>
-              <div class="fr-score-box" :class="riskLevel(acc.suspicion_score / 100)">
-                <div class="fr-score-val">{{ acc.suspicion_score.toFixed(0) }}</div>
-                <div class="fr-score-label">Risk Score</div>
-              </div>
-            </div>
           </div>
         </div>
 
